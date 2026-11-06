@@ -3,1150 +3,253 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Suite Avanzada de Métodos Numéricos</title>
-    <!-- Tailwind CSS -->
+    <title>Calculadora Avanzada de Métodos Numéricos</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Math.js for parsing and evaluation -->
+    <!-- Math.js CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
-    <!-- Plotly.js for Charts -->
-    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
-    <!-- KaTeX for rendering equations -->
+    <!-- Plotly.js CDN -->
+    <script src="https://cdn.plot.ly/plotly-2.20.0.min.js"></script>
+    <!-- KaTeX CSS y JS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
-    <!-- FontAwesome icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            50: '#f0f9ff',
-                            100: '#e0f2fe',
-                            500: '#0284c7',
-                            600: '#0369a1',
-                            700: '#075985',
-                            800: '#075985',
-                            900: '#0c4a6e',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        .katex-display { margin: 0.5em 0; overflow-x: auto; overflow-y: hidden; }
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        .dark ::-webkit-scrollbar-thumb { background: #475569; }
-    </style>
+    <!-- Estilos personalizados -->
+    <link rel="stylesheet" href="assets/css/main.css">
 </head>
-<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen flex flex-col font-sans transition-colors duration-200">
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col font-sans">
 
     <!-- Header -->
-    <header class="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-40">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <div class="bg-brand-600 p-2 rounded-lg text-white shadow-sm">
-                    <i class="fa-solid fa-square-root-variable text-xl"></i>
-                </div>
-                <div>
-                    <h1 class="text-lg font-bold tracking-tight">Suite de Métodos Numéricos</h1>
-                    <p class="text-xs text-slate-400">Ecuaciones continuas, Interpolación y Cuadraturas</p>
-                </div>
+    <header class="bg-slate-800 border-b border-slate-700 py-4 px-6 shadow-md">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div>
+                <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
+                    Calculadora de Métodos Numéricos
+                </h1>
             </div>
-            
-            <div class="flex items-center gap-3">
-                <button onclick="toggleDarkMode()" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition" title="Cambiar tema">
-                    <i id="theme-icon" class="fa-solid fa-moon"></i>
+            <!-- Pestañas Superiores -->
+            <nav class="flex bg-slate-900 p-1.5 rounded-xl border border-slate-700 shadow-inner">
+                <button onclick="switchTab('ecuaciones')" id="btn-ecuaciones" class="tab-btn px-4 py-2 text-sm font-medium rounded-lg transition-all bg-blue-600 text-white shadow">
+                    Ecuaciones
                 </button>
-                <div class="text-xs bg-slate-800 text-slate-300 px-3 py-1.5 rounded-full border border-slate-700 hidden sm:block">
-                    <i class="fa-brands fa-github mr-1"></i> GitHub Pages ready
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <!-- App Container -->
-    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        
-        <!-- Pestañas de Navegación de Categorías Superiores -->
-        <div class="mb-6 border-b border-slate-200 dark:border-slate-700">
-            <nav class="-mb-px flex space-x-2 sm:space-x-8 overflow-x-auto" aria-label="Tabs">
-                <button onclick="switchCategory('roots')" id="tab-roots" class="tab-btn active-tab whitespace-nowrap py-3 px-4 border-b-2 font-bold text-sm flex items-center gap-2 transition-all text-brand-600 border-brand-600 dark:text-brand-400 dark:border-brand-400">
-                    <i class="fa-solid fa-square-root-variable"></i>
-                    1. Ecuaciones Algebraicas y Trascendentes
+                <button onclick="switchTab('interpolacion')" id="btn-interpolacion" class="tab-btn px-4 py-2 text-sm font-medium rounded-lg transition-all text-slate-400 hover:text-white">
+                    Interpolación
                 </button>
-                <button onclick="switchCategory('interp')" id="tab-interp" class="tab-btn whitespace-nowrap py-3 px-4 border-b-2 font-medium text-sm flex items-center gap-2 transition-all text-slate-500 border-transparent hover:text-slate-700 hover:border-slate-300 dark:text-slate-400 dark:hover:text-slate-300">
-                    <i class="fa-solid fa-chart-line"></i>
-                    2. Interpolación y Diferencias Finitas
-                </button>
-                <button onclick="switchCategory('integration')" id="tab-integration" class="tab-btn whitespace-nowrap py-3 px-4 border-b-2 font-medium text-sm flex items-center gap-2 transition-all text-slate-500 border-transparent hover:text-slate-700 hover:border-slate-300 dark:text-slate-400 dark:hover:text-slate-300">
-                    <i class="fa-solid fa-chart-area"></i>
-                    3. Integración Numérica y Gauss 2D
+                <button onclick="switchTab('integracion')" id="btn-integracion" class="tab-btn px-4 py-2 text-sm font-medium rounded-lg transition-all text-slate-400 hover:text-white">
+                    Integración & Gauss 2D
                 </button>
             </nav>
         </div>
+    </header>
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-
-            <!-- Controls Side (Left) -->
-            <div class="lg:col-span-5 space-y-5">
+    <!-- Contenido Principal -->
+    <main class="flex-grow max-w-7xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- SECCIÓN 1: ECUACIONES -->
+        <section id="tab-ecuaciones" class="tab-content lg:col-span-12 grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div class="lg:col-span-4 bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-lg flex flex-col gap-4">
+                <h2 class="text-lg font-semibold text-blue-300 border-b border-slate-700 pb-2">Ecuaciones Algebraicas y Trascendentes</h2>
                 
-                <!-- Card 1: Seleccion del Método (Filtrado dinámicamente por la pestaña activa) -->
-                <div class="bg-white dark:bg-slate-800 p-5 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
-                    <label class="block text-xs font-bold uppercase tracking-wider text-brand-600 dark:text-brand-500 mb-2">
-                        <i class="fa-solid fa-sliders mr-1"></i> Método Numérico Específico
-                    </label>
-                    <select id="method-select" onchange="handleMethodChange()" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg p-2.5 text-sm font-semibold text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-brand-500 focus:outline-none">
-                        <!-- Opciones de Ecuaciones -->
-                        <optgroup label="ECUACIONES ALGEBRAICAS Y TRASCENDENTES" id="group-roots">
-                            <option value="bisection">1. Método de la Bisección</option>
-                            <option value="false_position">2. Método de la Regla Falsa (Regula Falsi)</option>
-                            <option value="secant">3. Método de la Secante</option>
-                            <option value="newton_raphson">4. Método de Newton-Raphson</option>
-                            <option value="newton_modified">5. Newton-Raphson Modificado (Raíces Múltiples)</option>
-                        </optgroup>
-                        <!-- Opciones de Interpolación -->
-                        <optgroup label="INTERPOLACIÓN Y DIFERENCIAS FINITAS" id="group-interp">
-                            <option value="lagrange">6. Polinomio de Lagrange</option>
-                            <option value="newton_divided">7. Diferencias Divididas de Newton</option>
-                            <option value="finite_forward">8. Diferencias Finitas Avanzadas (Newton Progresivo)</option>
-                            <option value="finite_backward">9. Diferencias Finitas Regresivas (Newton Regresivo)</option>
-                        </optgroup>
-                        <!-- Opciones de Integración -->
-                        <optgroup label="INTEGRACIÓN NUMÉRICA Y GAUSS 2D" id="group-integration">
-                            <option value="trapezoid">10. Regla del Trapecio (Simple / Compuesto)</option>
-                            <option value="simpson13">11. Regla de Simpson 1/3</option>
-                            <option value="simpson38">12. Regla de Simpson 3/8</option>
-                            <option value="hybrid">13. Integración Híbrida / Combinada</option>
-                            <option value="gauss">14. Cuadratura de Gauss-Legendre (1D)</option>
-                            <option value="gauss_2d">15. Integrales Dobles por Tabla de Gauss 2D</option>
-                        </optgroup>
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-1">Función f(x):</label>
+                    <input type="text" id="eq-func" value="x^3 - x - 2" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-1">Método de Resolución:</label>
+                    <select id="eq-method" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
+                        <option value="biseccion">Bisección</option>
+                        <option value="regla_falsa">Regla Falsa (Regula Falsi)</option>
+                        <option value="secante">Secante</option>
+                        <option value="newton">Newton-Raphson</option>
+                        <option value="newton_mod">Newton-Raphson Modificado</option>
                     </select>
                 </div>
 
-                <!-- Card 2: Definicion de Función Ecuación -->
-                <div class="bg-white dark:bg-slate-800 p-5 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 space-y-4">
-                    <div class="flex justify-between items-center">
-                        <label class="text-xs font-bold uppercase tracking-wider text-brand-600 dark:text-brand-500">
-                            <i class="fa-solid fa-function mr-1"></i> Ecuación de Entrada
-                        </label>
-                        <button onclick="loadExample()" class="text-xs text-brand-600 dark:text-brand-500 hover:underline font-medium">
-                            <i class="fa-solid fa-bolt mr-1"></i> Cargar Ejemplo
-                        </button>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Extremo Inferior (a / x0):</label>
+                        <input type="number" id="eq-x0" value="1" step="any" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white">
                     </div>
-
-                    <div id="container-func-1d">
-                        <div class="relative">
-                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 font-serif italic text-sm">f(x) =</span>
-                            <input type="text" id="func-input" value="x^3 - 2*x - 5" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg pl-14 pr-3 py-2.5 text-sm font-mono focus:ring-2 focus:ring-brand-500 focus:outline-none">
-                        </div>
-                        <p class="text-[11px] text-slate-400 mt-1">Sintaxis Math.js: <code>x^3 - 2*x - 5</code>, <code>cos(x) - x</code>, <code>exp(-x) - x</code></p>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Extremo Superior (b / x1):</label>
+                        <input type="number" id="eq-x1" value="2" step="any" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white">
                     </div>
-
-                    <!-- Entrada para Funciones de 2 Variables (Integrales Dobles) -->
-                    <div id="container-func-2d" class="hidden">
-                        <div class="relative">
-                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 font-serif italic text-sm">f(x,y) =</span>
-                            <input type="text" id="func-2d-input" value="x^2 * y + x * y^2" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg pl-16 pr-3 py-2.5 text-sm font-mono focus:ring-2 focus:ring-brand-500 focus:outline-none">
-                        </div>
-                        <p class="text-[11px] text-slate-400 mt-1">Función de dos variables: <code>x^2 * y</code>, <code>sin(x) * cos(y)</code>, <code>x*y + exp(x)</code></p>
-                    </div>
-
-                    <!-- Parámetros de Sección 1: Ecuaciones Roots -->
-                    <div id="panel-roots-params" class="space-y-3 pt-2 border-t border-slate-100 dark:border-slate-700 hidden">
-                        <div class="grid grid-cols-2 gap-3">
-                            <div id="box-x0">
-                                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1" id="lbl-x0">x0 / Intervalo [a]</label>
-                                <input type="number" step="any" id="root-x0" value="1" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg p-2 text-sm">
-                            </div>
-                            <div id="box-x1">
-                                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1" id="lbl-x1">x1 / Intervalo [b]</label>
-                                <input type="number" step="any" id="root-x1" value="3" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg p-2 text-sm">
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-2 gap-3">
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Tolerancia Error ($\epsilon$)</label>
-                                <input type="number" step="any" id="root-tol" value="0.0001" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg p-2 text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Máx. Iteraciones</label>
-                                <input type="number" id="root-max-iter" value="50" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg p-2 text-sm">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Opciones de Integración -->
-                    <div id="panel-integration-params" class="space-y-3 pt-2 border-t border-slate-100 dark:border-slate-700">
-                        <div class="grid grid-cols-2 gap-3" id="box-limits-1d">
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Límite Inf. ($a$)</label>
-                                <input type="number" step="any" id="limit-a" value="0" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg p-2 text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Límite Sup. ($b$)</label>
-                                <input type="number" step="any" id="limit-b" value="3.14159" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg p-2 text-sm">
-                            </div>
-                        </div>
-
-                        <!-- Límites para Gauss 2D -->
-                        <div id="box-limits-2d" class="hidden space-y-2">
-                            <span class="text-xs font-bold text-slate-700 dark:text-slate-300">Límites de Integración Doble $\int_c^d \int_a^b f(x,y) dx dy$:</span>
-                            <div class="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label class="block text-[11px] font-semibold text-slate-500">x: Inf (a)</label>
-                                    <input type="number" step="any" id="limit-2d-a" value="0" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded p-1.5 text-xs">
-                                </div>
-                                <div>
-                                    <label class="block text-[11px] font-semibold text-slate-500">x: Sup (b)</label>
-                                    <input type="number" step="any" id="limit-2d-b" value="1" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded p-1.5 text-xs">
-                                </div>
-                            </div>
-                            <div class="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label class="block text-[11px] font-semibold text-slate-500">y: Inf (c)</label>
-                                    <input type="number" step="any" id="limit-2d-c" value="0" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded p-1.5 text-xs">
-                                </div>
-                                <div>
-                                    <label class="block text-[11px] font-semibold text-slate-500">y: Sup (d)</label>
-                                    <input type="number" step="any" id="limit-2d-d" value="2" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded p-1.5 text-xs">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div id="container-n-subintervals">
-                            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Subintervalos ($n$)</label>
-                            <input type="number" id="subintervals-n" value="6" min="1" max="500" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg p-2 text-sm">
-                        </div>
-
-                        <div id="container-gauss-points" class="hidden">
-                            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Puntos de Gauss (Nodos Legendre)</label>
-                            <select id="gauss-n-points" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg p-2 text-sm">
-                                <option value="2">2 Puntos ($N=2$)</option>
-                                <option value="3" selected>3 Puntos ($N=3$)</option>
-                                <option value="4">4 Puntos ($N=4$)</option>
-                                <option value="5">5 Puntos ($N=5$)</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <!-- Opciones de Interpolación -->
-                    <div id="panel-interpolation-params" class="space-y-3 pt-2 border-t border-slate-100 dark:border-slate-700 hidden">
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Punto a Evaluar ($x^*$)</label>
-                            <input type="number" step="any" id="interp-eval-x" value="2.5" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg p-2 text-sm">
-                        </div>
-
-                        <!-- Generador rápido de puntos desde f(x) -->
-                        <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-lg border border-slate-200 dark:border-slate-700 space-y-2">
-                            <span class="text-xs font-bold text-slate-700 dark:text-slate-300">Generar Puntos desde $f(x)$:</span>
-                            <div class="grid grid-cols-3 gap-2">
-                                <input type="number" step="any" id="gen-min" value="0" placeholder="Min x" class="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded p-1 text-xs">
-                                <input type="number" step="any" id="gen-max" value="5" placeholder="Max x" class="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded p-1 text-xs">
-                                <input type="number" id="gen-count" value="5" placeholder="Cant." class="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded p-1 text-xs">
-                            </div>
-                            <button onclick="generateTableFromFunc()" class="w-full bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-xs py-1 rounded text-slate-700 dark:text-slate-200 transition">
-                                <i class="fa-solid fa-table-cells mr-1"></i> Poblar Tabla automáticamente
-                            </button>
-                        </div>
-
-                        <!-- Tabla de Puntos Manual -->
-                        <div>
-                            <div class="flex justify-between items-center mb-1.5">
-                                <span class="text-xs font-semibold text-slate-600 dark:text-slate-400">Puntos de la Muestra $(x_i, y_i)$</span>
-                                <button onclick="addPointRow()" class="text-xs text-brand-600 dark:text-brand-500 font-medium hover:underline">+ Agregar Fila</button>
-                            </div>
-                            <div class="max-h-48 overflow-y-auto border border-slate-200 dark:border-slate-700 rounded-lg">
-                                <table class="w-full text-xs text-left">
-                                    <thead class="bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 uppercase sticky top-0">
-                                        <tr>
-                                            <th class="px-2 py-1.5 text-center">i</th>
-                                            <th class="px-2 py-1.5">x_i</th>
-                                            <th class="px-2 py-1.5">y_i</th>
-                                            <th class="px-1 py-1.5 text-center"></th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="points-table-body" class="divide-y divide-slate-200 dark:divide-slate-700">
-                                        <!-- Dynamic rows -->
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Botón de Ejecución principal -->
-                    <button onclick="runMethod()" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-semibold py-2.5 rounded-lg text-sm transition shadow-sm flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-play text-xs"></i> Calcular Resultado
-                    </button>
                 </div>
 
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Tolerancia Error:</label>
+                        <input type="text" id="eq-tol" value="0.0001" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Máx. Iteraciones:</label>
+                        <input type="number" id="eq-maxiter" value="50" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white">
+                    </div>
+                </div>
+
+                <button onclick="resolverEcuacion()" class="mt-auto bg-blue-600 hover:bg-blue-500 text-white font-medium py-2.5 rounded-lg transition-colors shadow">
+                    Calcular Raíz
+                </button>
             </div>
 
-            <!-- Results & Visualization Side (Right) -->
-            <div class="lg:col-span-7 space-y-5">
+            <div class="lg:col-span-8 flex flex-col gap-6">
+                <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-lg flex-grow">
+                    <h3 class="text-sm font-semibold text-slate-300 mb-3">Tabla de Iteraciones y Resultados</h3>
+                    <div id="eq-results" class="text-sm text-slate-300 overflow-x-auto max-h-96">
+                        <p class="text-slate-500 italic">Configura los parámetros y presiona "Calcular Raíz".</p>
+                    </div>
+                </div>
+                <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-lg h-80">
+                    <div id="eq-plot" class="w-full h-full"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN 2: INTERPOLACIÓN -->
+        <section id="tab-interpolacion" class="tab-content hidden lg:col-span-12 grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div class="lg:col-span-5 bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-lg flex flex-col gap-4">
+                <h2 class="text-lg font-semibold text-indigo-300 border-b border-slate-700 pb-2">Interpolación y Diferencias</h2>
                 
-                <!-- Main Result Display Box -->
-                <div class="bg-white dark:bg-slate-800 p-5 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-3 border-b border-slate-100 dark:border-slate-700 gap-2">
-                        <div>
-                            <span id="result-title" class="text-xs font-bold text-brand-600 dark:text-brand-500 uppercase tracking-wider">Valor Aproximado</span>
-                            <div id="result-main-val" class="text-2xl font-extrabold text-slate-900 dark:text-slate-50 mt-0.5">
-                                $--$
-                            </div>
-                        </div>
-                        <span id="badge-method" class="px-3 py-1 bg-brand-50 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300 text-xs font-semibold rounded-full border border-brand-200 dark:border-brand-800">
-                            Trapecio
-                        </span>
-                    </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-1">Método de Interpolación:</label>
+                    <select id="interp-method" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white">
+                        <option value="fin_progresivas">Newton - Diferencias Finitas hacia Adelante</option>
+                        <option value="fin_regresivas">Newton - Diferencias Finitas hacia Atrás</option>
+                        <option value="newton_div">Diferencias Divididas de Newton</option>
+                        <option value="lagrange">Polinomio de Lagrange</option>
+                    </select>
+                </div>
 
-                    <!-- Graph Container -->
-                    <div class="mt-4">
-                        <div class="flex justify-between items-center mb-2">
-                            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Representación Gráfica</h3>
-                            <span class="text-[11px] text-slate-400">Zoom / Pan habilitado</span>
-                        </div>
-                        <div id="plotly-plot" class="w-full h-80 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-slate-100 dark:border-slate-700"></div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Punto a Evaluar (x*):</label>
+                        <input type="number" id="interp-xval" value="1.5" step="any" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Generar desde Función:</label>
+                        <button onclick="generarPuntosDesdeFuncion()" class="w-full bg-slate-700 hover:bg-slate-600 text-white text-xs font-medium py-2 rounded-lg transition-colors">Auto-puntos</button>
                     </div>
                 </div>
 
-                <!-- Step by step details and LaTeX procedures -->
-                <div class="bg-white dark:bg-slate-800 p-5 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
-                    <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100 mb-3 flex items-center gap-2">
-                        <i class="fa-solid fa-list-ol text-brand-600 dark:text-brand-500"></i> Procedimiento Detallado
-                    </h3>
-                    <div id="step-by-step" class="space-y-3 text-sm text-slate-600 dark:text-slate-300 leading-relaxed overflow-x-auto">
-                        <!-- Step contents dynamic -->
+                <div>
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="text-xs font-medium text-slate-300">Puntos (X, Y):</label>
+                        <button onclick="agregarPuntoTabla()" class="text-xs text-blue-400 hover:underline">+ Añadir fila</button>
                     </div>
+                    <div id="puntos-container" class="max-h-56 overflow-y-auto space-y-2 pr-1"></div>
                 </div>
 
+                <button onclick="calcularInterpolacion()" class="mt-auto bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2.5 rounded-lg transition-colors shadow">
+                    Interpolar y Graficar
+                </button>
             </div>
 
-        </div>
+            <div class="lg:col-span-7 flex flex-col gap-6">
+                <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-lg">
+                    <h3 class="text-sm font-semibold text-slate-300 mb-3">Tablas de Resultados y Polinomio</h3>
+                    <div id="interp-results" class="text-sm text-slate-300 overflow-x-auto max-h-96">
+                        <p class="text-slate-500 italic">Ingresa los puntos y calcula.</p>
+                    </div>
+                </div>
+                <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-lg h-80">
+                    <div id="interp-plot" class="w-full h-full"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN 3: INTEGRACIÓN Y GAUSS 2D -->
+        <section id="tab-integracion" class="tab-content hidden lg:col-span-12 grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div class="lg:col-span-5 bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-lg flex flex-col gap-4">
+                <h2 class="text-lg font-semibold text-emerald-300 border-b border-slate-700 pb-2">Integración Numérica y Doble</h2>
+                
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-1">Tipo de Integral:</label>
+                    <select id="int-tipo" onchange="toggleTipoIntegral()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white">
+                        <option value="1d">Integral Simple 1D</option>
+                        <option value="2d">Integral Doble 2D (Gauss)</option>
+                    </select>
+                </div>
+
+                <div id="panel-1d">
+                    <label class="block text-xs font-medium text-slate-300 mb-1">Función f(x):</label>
+                    <input type="text" id="int-func" value="x^2 * exp(-x)" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white mb-3">
+
+                    <label class="block text-xs font-medium text-slate-300 mb-1">Método 1D:</label>
+                    <select id="int-method" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white mb-3">
+                        <option value="trapecio">Regla del Trapecio (Compuesto)</option>
+                        <option value="simpson13">Regla de Simpson 1/3</option>
+                        <option value="simpson38">Regla de Simpson 3/8</option>
+                        <option value="gauss1d">Cuadratura de Gauss-Legendre</option>
+                    </select>
+
+                    <div class="grid grid-cols-2 gap-3 mb-3">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-300 mb-1">Límite a:</label>
+                            <input type="number" id="int-a" value="0" step="any" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-300 mb-1">Límite b:</label>
+                            <input type="number" id="int-b" value="3" step="any" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white">
+                        </div>
+                    </div>
+
+                    <div id="div-n-intervalos">
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Número de Intervalos (n):</label>
+                        <input type="number" id="int-n" value="4" min="1" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white">
+                    </div>
+                </div>
+
+                <div id="panel-2d" class="hidden">
+                    <label class="block text-xs font-medium text-slate-300 mb-1">Función f(x, y):</label>
+                    <input type="text" id="int2d-func" value="x*y" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white mb-3">
+
+                    <div class="grid grid-cols-2 gap-3 mb-3">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-300 mb-1">Límite x (a, b):</label>
+                            <div class="flex gap-1">
+                                <input type="number" id="int2d-ax" value="0" step="any" class="w-1/2 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-sm text-white">
+                                <input type="number" id="int2d-bx" value="1" step="any" class="w-1/2 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-sm text-white">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-300 mb-1">Límite y (c, d):</label>
+                            <div class="flex gap-1">
+                                <input type="number" id="int2d-cy" value="0" step="any" class="w-1/2 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-sm text-white">
+                                <input type="number" id="int2d-dy" value="1" step="any" class="w-1/2 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-sm text-white">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Puntos de Gauss por Eje:</label>
+                        <select id="int2d-puntos" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white">
+                            <option value="2">2 Puntos (2x2)</option>
+                            <option value="3">3 Puntos (3x3)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button onclick="calcularIntegracion()" class="mt-auto bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-2.5 rounded-lg transition-colors shadow">
+                    Calcular Integral
+                </button>
+            </div>
+
+            <div class="lg:col-span-7 flex flex-col gap-6">
+                <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-lg">
+                    <h3 class="text-sm font-semibold text-slate-300 mb-3">Tabla de Desglose y Resultados</h3>
+                    <div id="int-results" class="text-sm text-slate-300 overflow-x-auto max-h-96">
+                        <p class="text-slate-500 italic">Selecciona los parámetros y calcula.</p>
+                    </div>
+                </div>
+                <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-lg h-80">
+                    <div id="int-plot" class="w-full h-full"></div>
+                </div>
+            </div>
+        </section>
+
     </main>
 
-    <!-- Footer -->
-    <footer class="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 py-4 mt-auto transition-colors">
-        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-400">
-            Calculadora de Métodos Numéricos &copy; 2026 &bull; Evaluador simbiótico continuo y discreto
-        </div>
-    </footer>
-
-    <!-- SCRIPT APPLICATION LOGIC -->
-    <script>
-        // Points array for interpolation
-        let interpPoints = [
-            {x: 0, y: 0},
-            {x: 1, y: 0.8415},
-            {x: 2, y: 0.9093},
-            {x: 3, y: 0.1411},
-            {x: 4, y: -0.7568}
-        ];
-
-        // Gauss-Legendre Nodes and Weights (Interval [-1, 1])
-        const GAUSS_RULES = {
-            2: { x: [-0.5773502691896257, 0.5773502691896257], w: [1.0, 1.0] },
-            3: { x: [-0.7745966692414834, 0.0, 0.7745966692414834], w: [5/9, 8/9, 5/9] },
-            4: { x: [-0.8611363115940526, -0.3399810435848563, 0.3399810435848563, 0.8611363115940526], w: [0.3478548451374538, 0.6521451548625461, 0.6521451548625461, 0.3478548451374538] },
-            5: { x: [-0.9061798459386640, -0.5384693101056831, 0.0, 0.5384693101056831, 0.9061798459386640], w: [0.2369268850561891, 0.4786286704993665, 0.5688888888888889, 0.4786286704993665, 0.2369268850561891] }
-        };
-
-        let currentCategory = 'roots';
-
-        window.onload = function() {
-            renderPointsTable();
-            switchCategory('roots');
-        };
-
-        function switchCategory(cat) {
-            currentCategory = cat;
-
-            // Actualizar estilo visual de las pestañas
-            const tabs = ['roots', 'interp', 'integration'];
-            tabs.forEach(t => {
-                const btn = document.getElementById(`tab-${t}`);
-                if (t === cat) {
-                    btn.className = "tab-btn active-tab whitespace-nowrap py-3 px-4 border-b-2 font-bold text-sm flex items-center gap-2 transition-all text-brand-600 border-brand-600 dark:text-brand-400 dark:border-brand-400";
-                } else {
-                    btn.className = "tab-btn whitespace-nowrap py-3 px-4 border-b-2 font-medium text-sm flex items-center gap-2 transition-all text-slate-500 border-transparent hover:text-slate-700 hover:border-slate-300 dark:text-slate-400 dark:hover:text-slate-300";
-                }
-            });
-
-            // Filtrar grupos en el select de métodos
-            document.getElementById('group-roots').style.display = cat === 'roots' ? '' : 'none';
-            document.getElementById('group-interp').style.display = cat === 'interp' ? '' : 'none';
-            document.getElementById('group-integration').style.display = cat === 'integration' ? '' : 'none';
-
-            // Seleccionar el primer método de la categoría activa
-            const selectElem = document.getElementById('method-select');
-            if (cat === 'roots') selectElem.value = 'bisection';
-            else if (cat === 'interp') selectElem.value = 'lagrange';
-            else if (cat === 'integration') selectElem.value = 'trapezoid';
-
-            handleMethodChange();
-            runMethod();
-        }
-
-        function toggleDarkMode() {
-            const isDark = document.documentElement.classList.toggle('dark');
-            const icon = document.getElementById('theme-icon');
-            icon.className = isDark ? "fa-solid fa-sun" : "fa-solid fa-moon";
-            runMethod();
-        }
-
-        function handleMethodChange() {
-            const method = document.getElementById('method-select').value;
-            const isRoots = ['bisection', 'false_position', 'secant', 'newton_raphson', 'newton_modified'].includes(method);
-            const isInterp = ['lagrange', 'newton_divided', 'finite_forward', 'finite_backward'].includes(method);
-            const isIntegration = ['trapezoid', 'simpson13', 'simpson38', 'hybrid', 'gauss', 'gauss_2d'].includes(method);
-
-            document.getElementById('panel-roots-params').classList.toggle('hidden', !isRoots);
-            document.getElementById('panel-interpolation-params').classList.toggle('hidden', !isInterp);
-            document.getElementById('panel-integration-params').classList.toggle('hidden', !isIntegration);
-
-            document.getElementById('container-func-1d').classList.toggle('hidden', method === 'gauss_2d');
-            document.getElementById('container-func-2d').classList.toggle('hidden', method !== 'gauss_2d');
-
-            if (isRoots) {
-                const singlePt = ['newton_raphson', 'newton_modified'].includes(method);
-                document.getElementById('box-x1').classList.toggle('hidden', singlePt);
-                document.getElementById('lbl-x0').innerText = singlePt ? "Valor Inicial (x0)" : "Extremo a / x0";
-                document.getElementById('lbl-x1').innerText = "Extremo b / x1";
-            }
-
-            if (isIntegration) {
-                document.getElementById('container-gauss-points').classList.toggle('hidden', !['gauss', 'gauss_2d'].includes(method));
-                document.getElementById('container-n-subintervals').classList.toggle('hidden', ['gauss', 'gauss_2d'].includes(method));
-                document.getElementById('box-limits-1d').classList.toggle('hidden', method === 'gauss_2d');
-                document.getElementById('box-limits-2d').classList.toggle('hidden', method !== 'gauss_2d');
-            }
-
-            const selectElem = document.getElementById('method-select');
-            const selectedText = selectElem.options[selectElem.selectedIndex].text;
-            document.getElementById('badge-method').innerText = selectedText.split('.')[1] || selectedText;
-        }
-
-        function parseUserFunction(exprStr) {
-            try {
-                const compiled = math.compile(exprStr);
-                return function(xVal) {
-                    return compiled.evaluate({ x: xVal });
-                };
-            } catch (err) { return null; }
-        }
-
-        function parseUserFunction2D(exprStr) {
-            try {
-                const compiled = math.compile(exprStr);
-                return function(xVal, yVal) {
-                    return compiled.evaluate({ x: xVal, y: yVal });
-                };
-            } catch (err) { return null; }
-        }
-
-        function renderPointsTable() {
-            const tbody = document.getElementById('points-table-body');
-            tbody.innerHTML = '';
-            interpPoints.forEach((p, idx) => {
-                const tr = document.createElement('tr');
-                tr.className = "bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/50";
-                tr.innerHTML = `
-                    <td class="px-2 py-1 text-center text-slate-400 font-mono">${idx}</td>
-                    <td class="px-2 py-1"><input type="number" step="any" value="${p.x}" onchange="updatePoint(${idx}, 'x', this.value)" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded px-1.5 py-0.5 text-xs"></td>
-                    <td class="px-2 py-1"><input type="number" step="any" value="${p.y}" onchange="updatePoint(${idx}, 'y', this.value)" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded px-1.5 py-0.5 text-xs"></td>
-                    <td class="px-1 py-1 text-center"><button onclick="removePointRow(${idx})" class="text-red-400 hover:text-red-600"><i class="fa-solid fa-times"></i></button></td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        function updatePoint(idx, field, val) { interpPoints[idx][field] = parseFloat(val) || 0; }
-        function addPointRow() {
-            const nextX = interpPoints.length > 0 ? interpPoints[interpPoints.length - 1].x + 1 : 0;
-            interpPoints.push({ x: nextX, y: 0 });
-            renderPointsTable();
-        }
-        function removePointRow(idx) {
-            if (interpPoints.length <= 2) { alert("Se requieren al menos 2 puntos para interpolar."); return; }
-            interpPoints.splice(idx, 1);
-            renderPointsTable();
-        }
-
-        function generateTableFromFunc() {
-            const exprStr = document.getElementById('func-input').value;
-            const f = parseUserFunction(exprStr);
-            if (!f) { alert("Error en la ecuación de entrada."); return; }
-            const minX = parseFloat(document.getElementById('gen-min').value) || 0;
-            const maxX = parseFloat(document.getElementById('gen-max').value) || 5;
-            const count = parseInt(document.getElementById('gen-count').value) || 5;
-            if (count < 2) return;
-            const step = (maxX - minX) / (count - 1);
-            interpPoints = [];
-            for (let i = 0; i < count; i++) {
-                const xi = minX + i * step;
-                interpPoints.push({ x: parseFloat(xi.toFixed(4)), y: parseFloat(f(xi).toFixed(4)) });
-            }
-            renderPointsTable();
-            runMethod();
-        }
-
-        function loadExample() {
-            const method = document.getElementById('method-select').value;
-            if (['bisection', 'false_position', 'secant', 'newton_raphson', 'newton_modified'].includes(method)) {
-                document.getElementById('func-input').value = "x^3 - 2*x - 5";
-                document.getElementById('root-x0').value = "1";
-                document.getElementById('root-x1').value = "3";
-            } else if (method === 'gauss_2d') {
-                document.getElementById('func-2d-input').value = "x^2 * y + 2*x";
-            } else {
-                document.getElementById('func-input').value = "sin(x) + x^2 / 5";
-            }
-            runMethod();
-        }
-
-        function runMethod() {
-            const method = document.getElementById('method-select').value;
-            if (['bisection', 'false_position', 'secant', 'newton_raphson', 'newton_modified'].includes(method)) {
-                const exprStr = document.getElementById('func-input').value;
-                const f = parseUserFunction(exprStr);
-                if (!f) { alert("Error en la función de entrada."); return; }
-                executeRoots(method, f, exprStr);
-            } else if (['lagrange', 'newton_divided', 'finite_forward', 'finite_backward'].includes(method)) {
-                const exprStr = document.getElementById('func-input').value;
-                const f = parseUserFunction(exprStr);
-                executeInterpolation(method, f);
-            } else {
-                executeIntegration(method);
-            }
-        }
-
-
-        // ==========================================
-        // SECCIÓN 1: ECUACIONES ALGEBRAICAS Y TRASCENDENTES
-        // ==========================================
-        function executeRoots(method, f, exprStr) {
-            let x0 = parseFloat(document.getElementById('root-x0').value);
-            let x1 = parseFloat(document.getElementById('root-x1').value);
-            const tol = parseFloat(document.getElementById('root-tol').value) || 0.0001;
-            const maxIter = parseInt(document.getElementById('root-max-iter').value) || 50;
-
-            document.getElementById('result-title').innerText = "Raíz Calculada (x*)";
-
-            let root = null;
-            let rows = [];
-            let stepsHtml = "";
-
-            // Numerical Derivatives
-            const df = (x) => (f(x + 1e-6) - f(x - 1e-6)) / 2e-6;
-            const d2f = (x) => (f(x + 1e-5) - 2*f(x) + f(x - 1e-5)) / 1e-10;
-
-            if (method === 'bisection') {
-                let a = x0, b = x1, fa = f(a), fb = f(b);
-                if (fa * fb > 0) {
-                    alert("f(a) y f(b) deben tener signos opuestos para Bisección.");
-                    return;
-                }
-                let xr = a, xrOld = a, err = 100;
-                for (let k = 1; k <= maxIter; k++) {
-                    xr = (a + b) / 2;
-                    const fxr = f(xr);
-                    if (k > 1) err = Math.abs((xr - xrOld) / xr);
-                    rows.push({ k, a, b, xr, fxr, err: k === 1 ? '-' : (err * 100).toFixed(4) + '%' });
-                    if (Math.abs(fxr) < tol || err < tol) { root = xr; break; }
-                    if (fa * fxr < 0) { b = xr; fb = fxr; } else { a = xr; fa = fxr; }
-                    xrOld = xr;
-                }
-                root = xr;
-
-            } else if (method === 'false_position') {
-                let a = x0, b = x1, fa = f(a), fb = f(b);
-                if (fa * fb > 0) {
-                    alert("f(a) y f(b) deben tener signos opuestos para Regla Falsa.");
-                    return;
-                }
-                let xr = a, xrOld = a, err = 100;
-                for (let k = 1; k <= maxIter; k++) {
-                    xr = b - (fb * (a - b)) / (fa - fb);
-                    const fxr = f(xr);
-                    if (k > 1) err = Math.abs((xr - xrOld) / xr);
-                    rows.push({ k, a, b, xr, fxr, err: k === 1 ? '-' : (err * 100).toFixed(4) + '%' });
-                    if (Math.abs(fxr) < tol || err < tol) { root = xr; break; }
-                    if (fa * fxr < 0) { b = xr; fb = fxr; } else { a = xr; fa = fxr; }
-                    xrOld = xr;
-                }
-                root = xr;
-
-            } else if (method === 'secant') {
-                let xPrev = x0, xCurr = x1;
-                for (let k = 1; k <= maxIter; k++) {
-                    const fPrev = f(xPrev), fCurr = f(xCurr);
-                    if (Math.abs(fCurr - fPrev) < 1e-12) break;
-                    const xNext = xCurr - (fCurr * (xCurr - xPrev)) / (fCurr - fPrev);
-                    const err = Math.abs((xNext - xCurr) / xNext);
-                    rows.push({ k, a: xPrev, b: xCurr, xr: xNext, fxr: f(xNext), err: (err * 100).toFixed(4) + '%' });
-                    xPrev = xCurr;
-                    xCurr = xNext;
-                    if (Math.abs(f(xNext)) < tol || err < tol) { root = xNext; break; }
-                }
-                root = xCurr;
-
-            } else if (method === 'newton_raphson') {
-                let x = x0;
-                for (let k = 1; k <= maxIter; k++) {
-                    const fx = f(x), dfx = df(x);
-                    if (Math.abs(dfx) < 1e-12) break;
-                    const xNext = x - fx / dfx;
-                    const err = Math.abs((xNext - x) / xNext);
-                    rows.push({ k, a: x, b: dfx, xr: xNext, fxr: f(xNext), err: (err * 100).toFixed(4) + '%' });
-                    x = xNext;
-                    if (Math.abs(f(xNext)) < tol || err < tol) { root = xNext; break; }
-                }
-                root = x;
-
-            } else if (method === 'newton_modified') {
-                let x = x0;
-                for (let k = 1; k <= maxIter; k++) {
-                    const fx = f(x), dfx = df(x), d2fx = d2f(x);
-                    const denom = (dfx * dfx) - (fx * d2fx);
-                    if (Math.abs(denom) < 1e-12) break;
-                    const xNext = x - (fx * dfx) / denom;
-                    const err = Math.abs((xNext - x) / xNext);
-                    rows.push({ k, a: x, b: dfx, xr: xNext, fxr: f(xNext), err: (err * 100).toFixed(4) + '%' });
-                    x = xNext;
-                    if (Math.abs(f(xNext)) < tol || err < tol) { root = xNext; break; }
-                }
-                root = x;
-            }
-
-            document.getElementById('result-main-val').innerHTML = `$x^* = ${root !== null ? root.toFixed(6) : 'Sin convergencia'}$`;
-            
-            stepsHtml += `<p class="font-bold mb-1">Tabla de Iteraciones del Método:</p>`;
-            stepsHtml += `<div class="overflow-x-auto"><table class="min-w-full text-xs border border-slate-200 dark:border-slate-700 font-mono">`;
-            stepsHtml += `<tr class="bg-slate-100 dark:bg-slate-900"><th class="p-1 border">k</th><th class="p-1 border">a / x_k</th><th class="p-1 border">b / f'</th><th class="p-1 border">x_{r}</th><th class="p-1 border">f(x_r)</th><th class="p-1 border">Error Abs.</th></tr>`;
-            rows.forEach(r => {
-                stepsHtml += `<tr><td class="p-1 border font-bold text-center">${r.k}</td><td class="p-1 border">${r.a.toFixed(5)}</td><td class="p-1 border">${r.b.toFixed(5)}</td><td class="p-1 border text-brand-600 font-bold">${r.xr.toFixed(5)}</td><td class="p-1 border">${r.fxr.toFixed(5)}</td><td class="p-1 border text-emerald-600">${r.err}</td></tr>`;
-            });
-            stepsHtml += `</table></div>`;
-
-            document.getElementById('step-by-step').innerHTML = stepsHtml;
-            renderMathInElement(document.getElementById('step-by-step'));
-            renderMathInElement(document.getElementById('result-main-val'));
-
-            plotRootsResult(f, x0, x1, root);
-        }
-
-        function plotRootsResult(f, x0, x1, root) {
-            const margin = 2;
-            const minX = Math.min(x0, x1, root || 0) - margin;
-            const maxX = Math.max(x0, x1, root || 0) + margin;
-            const steps = 200;
-            const h = (maxX - minX) / steps;
-
-            let curveX = [], curveY = [];
-            for (let i = 0; i <= steps; i++) {
-                const x = minX + i * h;
-                curveX.push(x);
-                try { curveY.push(f(x)); } catch(e) { curveY.push(null); }
-            }
-
-            const data = [
-                { x: curveX, y: curveY, mode: 'lines', name: 'f(x)', line: { color: '#0284c7', width: 2.5 } },
-                { x: [minX, maxX], y: [0, 0], mode: 'lines', name: 'Eje X', line: { color: '#64748b', dash: 'dash' } }
-            ];
-
-            if (root !== null) {
-                data.push({ x: [root], y: [f(root)], mode: 'markers', name: `Raíz x* = ${root.toFixed(4)}`, marker: { color: '#ef4444', size: 10, symbol: 'circle' } });
-            }
-
-            renderPlotlyChart(data);
-        }
-
-
-        // ==========================================
-        // SECCIÓN 2: INTERPOLACIÓN Y DIFERENCIAS FINITAS
-        // ==========================================
-        function executeInterpolation(method, f) {
-            const evalX = parseFloat(document.getElementById('interp-eval-x').value);
-            const pts = [...interpPoints].sort((a, b) => a.x - b.x);
-            const n = pts.length;
-
-            document.getElementById('result-title').innerText = `Interpolado en x* = ${evalX}`;
-
-            let resY = 0;
-            let stepsHtml = "";
-            let curvePolyFunc;
-
-            if (method === 'lagrange') {
-                let sum = 0;
-                let lTerms = [];
-                for (let i = 0; i < n; i++) {
-                    let term = pts[i].y;
-                    let numStr = "", denStr = "";
-                    for (let j = 0; j < n; j++) {
-                        if (i !== j) {
-                            term *= (evalX - pts[j].x) / (pts[i].x - pts[j].x);
-                            numStr += `(${evalX} - ${pts[j].x})`;
-                            denStr += `(${pts[i].x} - ${pts[j].x})`;
-                        }
-                    }
-                    sum += term;
-                    lTerms.push(`L_{${i}}(${evalX}) \\cdot y_${i} = \\frac{${numStr}}{${denStr}} \\cdot (${pts[i].y}) = ${term.toFixed(6)}`);
-                }
-                resY = sum;
-                curvePolyFunc = (x) => evalLagrange(pts, x);
-
-                stepsHtml += `<p><strong>Polinomio de Lagrange:</strong> $$P(x) = \\sum_{i=0}^{${n-1}} y_i L_i(x)$$</p>`;
-                stepsHtml += `<p>Evaluación de Términos Base $L_i(x^*)$:</p><ul class="list-disc pl-5 space-y-1">`;
-                lTerms.forEach(t => stepsHtml += `<li>$$${t}$$</li>`);
-                stepsHtml += `</ul><p class="mt-2">Suma Total: $$P(${evalX}) = \\mathbf{${resY.toFixed(6)}}$$</p>`;
-
-            } else if (method === 'newton_divided') {
-                let table = Array.from({ length: n }, () => Array(n).fill(0));
-                for (let i = 0; i < n; i++) table[i][0] = pts[i].y;
-
-                for (let j = 1; j < n; j++) {
-                    for (let i = 0; i < n - j; i++) {
-                        table[i][j] = (table[i+1][j-1] - table[i][j-1]) / (pts[i+j].x - pts[i].x);
-                    }
-                }
-
-                resY = table[0][0];
-                let prod = 1;
-                for (let i = 1; i < n; i++) {
-                    prod *= (evalX - pts[i-1].x);
-                    resY += table[0][i] * prod;
-                }
-                curvePolyFunc = (x) => evalNewtonDivided(pts, table, x);
-
-                stepsHtml += `<p><strong>Tabla de Diferencias Divididas de Newton:</strong></p>`;
-                stepsHtml += buildDividedDiffTableHTML(pts, table);
-                stepsHtml += `<p class="mt-2">Evaluando el polinomio: $$P(${evalX}) = \\mathbf{${resY.toFixed(6)}}$$</p>`;
-
-            } else if (method === 'finite_forward' || method === 'finite_backward') {
-                const h = pts[1].x - pts[0].x;
-                let diffTable = Array.from({ length: n }, () => Array(n).fill(0));
-                for (let i = 0; i < n; i++) diffTable[i][0] = pts[i].y;
-
-                for (let j = 1; j < n; j++) {
-                    for (let i = 0; i < n - j; i++) {
-                        diffTable[i][j] = diffTable[i+1][j-1] - diffTable[i][j-1];
-                    }
-                }
-
-                if (method === 'finite_forward') {
-                    const s = (evalX - pts[0].x) / h;
-                    resY = diffTable[0][0];
-                    let term = 1;
-                    for (let i = 1; i < n; i++) {
-                        term *= (s - (i - 1)) / i;
-                        resY += term * diffTable[0][i];
-                    }
-                    stepsHtml += `<p><strong>Diferencias Finitas Avanzadas (Newton Progresivo):</strong></p>`;
-                    stepsHtml += `<p>Variable parametrizada $$s = \\frac{x - x_0}{h} = \\frac{${evalX} - ${pts[0].x}}{${h.toFixed(4)}} = ${s.toFixed(4)}$$</p>`;
-                    stepsHtml += buildFiniteDiffTableHTML(pts, diffTable);
-                    stepsHtml += `<p class="mt-2">$$P(${evalX}) = \\mathbf{${resY.toFixed(6)}}$$</p>`;
-                } else {
-                    const s = (evalX - pts[n-1].x) / h;
-                    resY = diffTable[n-1][0];
-                    let term = 1;
-                    for (let i = 1; i < n; i++) {
-                        term *= (s + (i - 1)) / i;
-                        resY += term * diffTable[n-1-i][i];
-                    }
-                    stepsHtml += `<p><strong>Diferencias Finitas Regresivas (Newton Regresivo):</strong></p>`;
-                    stepsHtml += `<p>Variable parametrizada $$s = \\frac{x - x_n}{h} = \\frac{${evalX} - ${pts[n-1].x}}{${h.toFixed(4)}} = ${s.toFixed(4)}$$</p>`;
-                    stepsHtml += buildFiniteDiffTableHTML(pts, diffTable);
-                    stepsHtml += `<p class="mt-2">$$P(${evalX}) = \\mathbf{${resY.toFixed(6)}}$$</p>`;
-                }
-
-                curvePolyFunc = (x) => evalLagrange(pts, x);
-            }
-
-            document.getElementById('result-main-val').innerHTML = `$y(${evalX}) = ${resY.toFixed(6)}$`;
-            document.getElementById('step-by-step').innerHTML = stepsHtml;
-            renderMathInElement(document.getElementById('step-by-step'));
-            renderMathInElement(document.getElementById('result-main-val'));
-
-            plotInterpolationResults(f, pts, evalX, resY, curvePolyFunc);
-        }
-
-        function evalLagrange(pts, x) {
-            let sum = 0;
-            for (let i = 0; i < pts.length; i++) {
-                let term = pts[i].y;
-                for (let j = 0; j < pts.length; j++) {
-                    if (i !== j) term *= (x - pts[j].x) / (pts[i].x - pts[j].x);
-                }
-                sum += term;
-            }
-            return sum;
-        }
-
-        function evalNewtonDivided(pts, table, x) {
-            let y = table[0][0];
-            let prod = 1;
-            for (let i = 1; i < pts.length; i++) {
-                prod *= (x - pts[i-1].x);
-                y += table[0][i] * prod;
-            }
-            return y;
-        }
-
-        function buildDividedDiffTableHTML(pts, table) {
-            const n = pts.length;
-            let html = `<div class="overflow-x-auto my-2"><table class="min-w-full text-xs border border-slate-200 dark:border-slate-700 font-mono">`;
-            html += `<tr class="bg-slate-100 dark:bg-slate-900"><th class="p-1 border">x</th><th class="p-1 border">f[x]</th>` + Array.from({length: n-1}, (_, k) => `<th class="p-1 border">Ord ${k+1}</th>`).join('') + `</tr>`;
-            for (let i = 0; i < n; i++) {
-                html += `<tr><td class="p-1 border font-bold">${pts[i].x}</td>`;
-                for (let j = 0; j < n - i; j++) {
-                    html += `<td class="p-1 border">${table[i][j].toFixed(5)}</td>`;
-                }
-                html += `</tr>`;
-            }
-            html += `</table></div>`;
-            return html;
-        }
-
-        function buildFiniteDiffTableHTML(pts, diffTable) {
-            const n = pts.length;
-            let html = `<div class="overflow-x-auto my-2"><table class="min-w-full text-xs border border-slate-200 dark:border-slate-700 font-mono">`;
-            html += `<tr class="bg-slate-100 dark:bg-slate-900"><th class="p-1 border">x</th><th class="p-1 border">y</th>` + Array.from({length: n-1}, (_, k) => `<th class="p-1 border">&Delta;^${k+1} y</th>`).join('') + `</tr>`;
-            for (let i = 0; i < n; i++) {
-                html += `<tr><td class="p-1 border font-bold">${pts[i].x}</td>`;
-                for (let j = 0; j < n - i; j++) {
-                    html += `<td class="p-1 border">${diffTable[i][j].toFixed(5)}</td>`;
-                }
-                html += `</tr>`;
-            }
-            html += `</table></div>`;
-            return html;
-        }
-
-
-        // ==========================================
-        // SECCIÓN 3: INTEGRACIÓN NUMÉRICA Y GAUSS 2D
-        // ==========================================
-        function executeIntegration(method) {
-            if (method === 'gauss_2d') {
-                const expr2d = document.getElementById('func-2d-input').value;
-                const f2d = parseUserFunction2D(expr2d);
-                if (!f2d) { alert("Error en la función f(x,y)."); return; }
-                executeGauss2D(f2d);
-                return;
-            }
-
-            const exprStr = document.getElementById('func-input').value;
-            const f = parseUserFunction(exprStr);
-            const a = parseFloat(document.getElementById('limit-a').value);
-            const b = parseFloat(document.getElementById('limit-b').value);
-            let n = parseInt(document.getElementById('subintervals-n').value) || 1;
-
-            document.getElementById('result-title').innerText = "Integral Aproximada I";
-
-            let result = 0;
-            let stepsHtml = "";
-            let areaShapes = [];
-
-            if (method === 'trapezoid') {
-                const h = (b - a) / n;
-                let sum = f(a) + f(b);
-                let innerSum = 0;
-                for (let i = 1; i < n; i++) innerSum += f(a + i * h);
-                result = (h / 2) * (sum + 2 * innerSum);
-
-                stepsHtml += `<p><strong>Regla Compuesta del Trapecio:</strong> $$I \\approx \\frac{h}{2} \\left[ f(a) + 2\\sum_{i=1}^{n-1} f(x_i) + f(b) \\right]$$</p>`;
-                stepsHtml += `<p>Resultado Final: $$I \\approx \\mathbf{${result.toFixed(6)}}$$</p>`;
-
-                for (let i = 0; i < n; i++) {
-                    const x0 = a + i * h, x1 = a + (i + 1) * h;
-                    areaShapes.push({ x: [x0, x0, x1, x1], y: [0, f(x0), f(x1), 0] });
-                }
-
-            } else if (method === 'simpson13') {
-                if (n % 2 !== 0) { n += 1; document.getElementById('subintervals-n').value = n; }
-                const h = (b - a) / n;
-                let sumOdd = 0, sumEven = 0;
-                for (let i = 1; i < n; i++) {
-                    const xi = a + i * h;
-                    if (i % 2 === 0) sumEven += f(xi); else sumOdd += f(xi);
-                }
-                result = (h / 3) * (f(a) + 4 * sumOdd + 2 * sumEven + f(b));
-                stepsHtml += `<p><strong>Regla de Simpson 1/3 (n=${n}):</strong> $$I \\approx \\mathbf{${result.toFixed(6)}}$$</p>`;
-                for (let i = 0; i < n; i++) {
-                    const x0 = a + i * h, x1 = a + (i + 1) * h;
-                    areaShapes.push({ x: [x0, x0, x1, x1], y: [0, f(x0), f(x1), 0] });
-                }
-
-            } else if (method === 'simpson38') {
-                if (n % 3 !== 0) { n = Math.ceil(n / 3) * 3; document.getElementById('subintervals-n').value = n; }
-                const h = (b - a) / n;
-                let sumMult3 = 0, sumRest = 0;
-                for (let i = 1; i < n; i++) {
-                    const xi = a + i * h;
-                    if (i % 3 === 0) sumMult3 += f(xi); else sumRest += f(xi);
-                }
-                result = ((3 * h) / 8) * (f(a) + 3 * sumRest + 2 * sumMult3 + f(b));
-                stepsHtml += `<p><strong>Regla de Simpson 3/8 (n=${n}):</strong> $$I \\approx \\mathbf{${result.toFixed(6)}}$$</p>`;
-                for (let i = 0; i < n; i++) {
-                    const x0 = a + i * h, x1 = a + (i + 1) * h;
-                    areaShapes.push({ x: [x0, x0, x1, x1], y: [0, f(x0), f(x1), 0] });
-                }
-
-            } else if (method === 'hybrid') {
-                const h = (b - a) / n;
-                let currentIdx = 0, totalSum = 0, rem = n;
-                stepsHtml += `<p><strong>Integración Híbrida / Combinada (n = ${n}):</strong></p><ul class="list-disc pl-5 text-xs">`;
-
-                while (rem > 0) {
-                    if (rem >= 2 && (rem % 2 === 0 || rem === 2 || rem === 4)) {
-                        const x0 = a + currentIdx * h, x1 = a + (currentIdx + 1) * h, x2 = a + (currentIdx + 2) * h;
-                        const subI = (h / 3) * (f(x0) + 4 * f(x1) + f(x2));
-                        totalSum += subI;
-                        stepsHtml += `<li>Simpson 1/3 (Tramo x_${currentIdx} a x_${currentIdx+2}): ${subI.toFixed(6)}</li>`;
-                        areaShapes.push({ x: [x0, x0, x2, x2], y: [0, f(x0), f(x2), 0] });
-                        currentIdx += 2; rem -= 2;
-                    } else if (rem >= 3) {
-                        const x0 = a + currentIdx * h, x3 = a + (currentIdx + 3) * h;
-                        const x1 = a + (currentIdx + 1) * h, x2 = a + (currentIdx + 2) * h;
-                        const subI = ((3 * h) / 8) * (f(x0) + 3 * f(x1) + 3 * f(x2) + f(x3));
-                        totalSum += subI;
-                        stepsHtml += `<li>Simpson 3/8 (Tramo x_${currentIdx} a x_${currentIdx+3}): ${subI.toFixed(6)}</li>`;
-                        areaShapes.push({ x: [x0, x0, x3, x3], y: [0, f(x0), f(x3), 0] });
-                        currentIdx += 3; rem -= 3;
-                    } else {
-                        const x0 = a + currentIdx * h, x1 = a + (currentIdx + 1) * h;
-                        const subI = (h / 2) * (f(x0) + f(x1));
-                        totalSum += subI;
-                        stepsHtml += `<li>Trapecio (Tramo x_${currentIdx} a x_${currentIdx+1}): ${subI.toFixed(6)}</li>`;
-                        areaShapes.push({ x: [x0, x0, x1, x1], y: [0, f(x0), f(x1), 0] });
-                        currentIdx += 1; rem -= 1;
-                    }
-                }
-                result = totalSum;
-                stepsHtml += `</ul><p class="mt-2">Suma Total Híbrida: $$I = \\mathbf{${result.toFixed(6)}}$$</p>`;
-
-            } else if (method === 'gauss') {
-                const nPoints = parseInt(document.getElementById('gauss-n-points').value) || 3;
-                const rule = GAUSS_RULES[nPoints];
-                const c1 = (b - a) / 2, c2 = (b + a) / 2;
-                let sum = 0;
-                for (let i = 0; i < nPoints; i++) {
-                    const xi = c1 * rule.x[i] + c2;
-                    sum += rule.w[i] * f(xi);
-                }
-                result = c1 * sum;
-                stepsHtml += `<p><strong>Cuadratura de Gauss-Legendre 1D (${nPoints} Puntos):</strong> $$I \\approx \\mathbf{${result.toFixed(6)}}$$</p>`;
-                areaShapes.push({ x: [a, a, b, b], y: [0, f(a), f(b), 0] });
-            }
-
-            document.getElementById('result-main-val').innerHTML = `$I \\approx ${result.toFixed(6)}$`;
-            document.getElementById('step-by-step').innerHTML = stepsHtml;
-            renderMathInElement(document.getElementById('step-by-step'));
-            renderMathInElement(document.getElementById('result-main-val'));
-
-            plotIntegrationResults(f, a, b, areaShapes);
-        }
-
-        // NUEVO: INTEGRAL DOBLE POR TABLA DE GAUSS 2D
-        function executeGauss2D(f2d) {
-            const a = parseFloat(document.getElementById('limit-2d-a').value);
-            const b = parseFloat(document.getElementById('limit-2d-b').value);
-            const c = parseFloat(document.getElementById('limit-2d-c').value);
-            const d = parseFloat(document.getElementById('limit-2d-d').value);
-            const nPoints = parseInt(document.getElementById('gauss-n-points').value) || 3;
-            const rule = GAUSS_RULES[nPoints];
-
-            document.getElementById('result-title').innerText = "Integral Doble I_2D";
-
-            const cx = (b - a) / 2, dx = (b + a) / 2;
-            const cy = (d - c) / 2, dy = (d + c) / 2;
-
-            let doubleSum = 0;
-            let gridRows = [];
-
-            for (let i = 0; i < nPoints; i++) {
-                const ti = rule.x[i], wi = rule.w[i];
-                const xi = cx * ti + dx;
-                for (let j = 0; j < nPoints; j++) {
-                    const sj = rule.x[j], wj = rule.w[j];
-                    const yj = cy * sj + dy;
-                    const val = f2d(xi, yj);
-                    const prod = wi * wj * val;
-                    doubleSum += prod;
-                    gridRows.push({ i: i+1, j: j+1, xi, yj, wi, wj, val, prod });
-                }
-            }
-
-            const result = cx * cy * doubleSum;
-
-            document.getElementById('result-main-val').innerHTML = `$$I_{2D} = \\int_{${c}}^{${d}} \\int_{${a}}^{${b}} f(x,y) dx dy \\approx \\mathbf{${result.toFixed(6)}}$$`;
-
-            let stepsHtml = `<p><strong>Transformación de Límites a Cuadrado $[-1, 1] \\times [-1, 1]$:</strong></p>`;
-            stepsHtml += `<p>$$x(t) = \\frac{${b}-${a}}{2}t + \\frac{${b}+${a}}{2} = ${cx.toFixed(4)}t + ${dx.toFixed(4)}$$</p>`;
-            stepsHtml += `<p>$$y(s) = \\frac{${d}-${c}}{2}s + \\frac{${d}+${c}}{2} = ${cy.toFixed(4)}s + ${dy.toFixed(4)}$$</p>`;
-            stepsHtml += `<p class="mt-2 font-bold text-xs">Evaluación en Malla de Nodos Gauss (N=${nPoints}):</p>`;
-            
-            stepsHtml += `<div class="overflow-x-auto my-2"><table class="min-w-full text-xs border border-slate-200 dark:border-slate-700 font-mono">`;
-            stepsHtml += `<tr class="bg-slate-100 dark:bg-slate-900"><th class="p-1 border">Nodo (i,j)</th><th class="p-1 border">x_i</th><th class="p-1 border">y_j</th><th class="p-1 border">w_i * w_j</th><th class="p-1 border">f(x_i, y_j)</th><th class="p-1 border">Parcial</th></tr>`;
-            gridRows.forEach(r => {
-                stepsHtml += `<tr><td class="p-1 border text-center">(${r.i}, ${r.j})</td><td class="p-1 border">${r.xi.toFixed(4)}</td><td class="p-1 border">${r.yj.toFixed(4)}</td><td class="p-1 border">${(r.wi*r.wj).toFixed(4)}</td><td class="p-1 border">${r.val.toFixed(4)}</td><td class="p-1 border text-brand-600 font-bold">${r.prod.toFixed(4)}</td></tr>`;
-            });
-            stepsHtml += `</table></div>`;
-            stepsHtml += `<p>Factor Jacobiano: $$J = \\left(\\frac{b-a}{2}\\right)\\left(\\frac{d-c}{2}\\right) = ${cx.toFixed(4)} \\times ${cy.toFixed(4)} = ${(cx*cy).toFixed(4)}$$</p>`;
-            stepsHtml += `<p class="mt-1">Resultado Final: $$I_{2D} = ${(cx*cy).toFixed(4)} \\times ${doubleSum.toFixed(5)} = \\mathbf{${result.toFixed(6)}}$$</p>`;
-
-            document.getElementById('step-by-step').innerHTML = stepsHtml;
-            renderMathInElement(document.getElementById('step-by-step'));
-            renderMathInElement(document.getElementById('result-main-val'));
-
-            // Plotly 3D Surface / Mesh scatter for 2D Gauss
-            plotGauss2DGrid(f2d, a, b, c, d, gridRows);
-        }
-
-        function plotGauss2DGrid(f2d, a, b, c, d, gridRows) {
-            const numGrid = 20;
-            const hx = (b - a) / numGrid;
-            const hy = (d - c) / numGrid;
-            let zData = [];
-            let xData = [];
-            let yData = [];
-
-            for (let j = 0; j <= numGrid; j++) {
-                const y = c + j * hy;
-                let zRow = [];
-                for (let i = 0; i <= numGrid; i++) {
-                    const x = a + i * hx;
-                    if (j === 0) xData.push(x);
-                    try { zRow.push(f2d(x, y)); } catch(e) { zRow.push(0); }
-                }
-                yData.push(y);
-                zData.push(zRow);
-            }
-
-            const surfaceTrace = {
-                type: 'surface',
-                x: xData,
-                y: yData,
-                z: zData,
-                colorscale: 'Viridis',
-                opacity: 0.8,
-                showscale: false
-            };
-
-            const nodeTrace = {
-                type: 'scatter3d',
-                mode: 'markers',
-                x: gridRows.map(r => r.xi),
-                y: gridRows.map(r => r.yj),
-                z: gridRows.map(r => r.val),
-                marker: { color: '#ef4444', size: 6, symbol: 'diamond' },
-                name: 'Nodos de Gauss 2D'
-            };
-
-            renderPlotly3DChart([surfaceTrace, nodeTrace]);
-        }
-
-        function plotInterpolationResults(f, pts, evalX, resY, polyFunc) {
-            const minX = Math.min(...pts.map(p => p.x), evalX) - 1;
-            const maxX = Math.max(...pts.map(p => p.x), evalX) + 1;
-            const steps = 150;
-            const h = (maxX - minX) / steps;
-
-            let origX = [], origY = [], polyX = [], polyY = [];
-            for (let i = 0; i <= steps; i++) {
-                const x = minX + i * h;
-                origX.push(x);
-                try { origY.push(f(x)); } catch(e) { origY.push(null); }
-                if (polyFunc) polyX.push(x), polyY.push(polyFunc(x));
-            }
-
-            const data = [
-                { x: origX, y: origY, mode: 'lines', name: 'f(x) Real', line: { color: '#94a3b8', dash: 'dot', width: 1.5 } },
-                { x: polyX, y: polyY, mode: 'lines', name: 'Polinomio Interpolador', line: { color: '#0284c7', width: 2.5 } },
-                { x: pts.map(p => p.x), y: pts.map(p => p.y), mode: 'markers', name: 'Puntos Muestra', marker: { color: '#0f172a', size: 8 } },
-                { x: [evalX], y: [resY], mode: 'markers', name: `Punto Evaluado (${evalX}, ${resY.toFixed(2)})`, marker: { color: '#ef4444', size: 11, symbol: 'diamond' } }
-            ];
-
-            renderPlotlyChart(data);
-        }
-
-        function plotIntegrationResults(f, a, b, areaShapes) {
-            const margin = Math.max((b - a) * 0.25, 0.5);
-            const minX = a - margin, maxX = b + margin;
-            const steps = 200, h = (maxX - minX) / steps;
-
-            let curveX = [], curveY = [];
-            for (let i = 0; i <= steps; i++) {
-                const x = minX + i * h;
-                curveX.push(x);
-                try { curveY.push(f(x)); } catch(e) { curveY.push(0); }
-            }
-
-            const data = [
-                { x: curveX, y: curveY, mode: 'lines', name: 'f(x)', line: { color: '#0284c7', width: 2.5 } }
-            ];
-
-            const shapes = areaShapes.map(s => ({
-                type: 'path',
-                path: `M ${s.x[0]} ${s.y[0]} L ${s.x[1]} ${s.y[1]} L ${s.x[2]} ${s.y[2]} L ${s.x[3]} ${s.y[3]} Z`,
-                fillcolor: 'rgba(2, 132, 199, 0.25)',
-                line: { color: '#0369a1', width: 1 }
-            }));
-
-            renderPlotlyChart(data, shapes);
-        }
-
-        function renderPlotlyChart(dataTraces, customShapes = []) {
-            const isDark = document.documentElement.classList.contains('dark');
-            const fontColor = isDark ? '#94a3b8' : '#475569';
-            const gridColor = isDark ? '#334155' : '#f1f5f9';
-
-            const layout = {
-                margin: { t: 15, r: 15, l: 40, b: 40 },
-                showlegend: true,
-                legend: { orientation: 'h', y: -0.2, font: { color: fontColor, size: 10 } },
-                xaxis: { gridcolor: gridColor, tickfont: { color: fontColor } },
-                yaxis: { gridcolor: gridColor, tickfont: { color: fontColor } },
-                shapes: customShapes,
-                paper_bgcolor: 'rgba(0,0,0,0)',
-                plot_bgcolor: 'rgba(0,0,0,0)'
-            };
-
-            Plotly.newPlot('plotly-plot', dataTraces, layout, { responsive: true, displayModeBar: false });
-        }
-
-        function renderPlotly3DChart(dataTraces) {
-            const isDark = document.documentElement.classList.contains('dark');
-            const fontColor = isDark ? '#94a3b8' : '#475569';
-
-            const layout = {
-                margin: { t: 10, r: 10, l: 10, b: 10 },
-                scene: {
-                    xaxis: { title: 'x', tickfont: { color: fontColor } },
-                    yaxis: { title: 'y', tickfont: { color: fontColor } },
-                    zaxis: { title: 'f(x,y)', tickfont: { color: fontColor } }
-                },
-                paper_bgcolor: 'rgba(0,0,0,0)',
-                plot_bgcolor: 'rgba(0,0,0,0)'
-            };
-
-            Plotly.newPlot('plotly-plot', dataTraces, layout, { responsive: true, displayModeBar: false });
-        }
-
-        function renderMathInElement(element) {
-            if (window.katex) {
-                element.innerHTML = element.innerHTML.replace(/\$([^\$]+)\$/g, (match, mathExp) => {
-                    try { return katex.renderToString(mathExp, { displayMode: false }); } catch (e) { return match; }
-                });
-                element.innerHTML = element.innerHTML.replace(/\$\$([^\$]+)\$\$/g, (match, mathExp) => {
-                    try { return katex.renderToString(mathExp, { displayMode: true }); } catch (e) { return match; }
-                });
-            }
-        }
-    </script>
+    <!-- Script principal -->
+    <script src="assets/js/main.js"></script>
 </body>
 </html>
