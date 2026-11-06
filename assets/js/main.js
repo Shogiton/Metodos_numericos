@@ -187,7 +187,8 @@ function resolverEcuacion() {
         }], {
             paper_bgcolor: 'transparent', plot_bgcolor: 'transparent', font: {color: '#f8fafc', size: 11},
             margin: {t: 20, r: 20, b: 30, l: 40}, xaxis: {gridcolor: '#334155'}, yaxis: {gridcolor: '#334155'}
-        }, {responsive: true});
+        }, {responsive: true,
+            displayModeBar: false});
 
     } catch (err) {
         document.getElementById('eq-results').innerHTML = `<span class="text-red-400">Error: ${err.message}</span>`;
@@ -371,7 +372,8 @@ function calcularInterpolacion() {
     }], {
         paper_bgcolor: 'transparent', plot_bgcolor: 'transparent', font: {color: '#f8fafc', size: 11},
         margin: {t: 20, r: 20, b: 30, l: 40}, xaxis: {gridcolor: '#334155'}, yaxis: {gridcolor: '#334155'}
-    }, {responsive: true});
+    }, {responsive: true,
+        displayModeBar: false});
 }
 
 // --- MÓDULO 3: INTEGRACIÓN (Con Validaciones de n para Simpson) ---
@@ -487,7 +489,8 @@ function calcularIntegracion() {
         }], {
             paper_bgcolor: 'transparent', plot_bgcolor: 'transparent', font: {color: '#f8fafc', size: 11},
             margin: {t: 20, r: 20, b: 30, l: 40}, xaxis: {gridcolor: '#334155'}, yaxis: {gridcolor: '#334155'}
-        }, {responsive: true});
+        }, {responsive: true,
+    displayModeBar: false});
 
     } else {
         const expr = document.getElementById('int2d-func').value;
@@ -567,6 +570,6 @@ function calcularIntegracion() {
         }], {
             paper_bgcolor: 'transparent', plot_bgcolor: 'transparent', font: {color: '#f8fafc', size: 11},
             margin: {t: 20, r: 20, b: 30, l: 40}
-        }, {responsive: true});
+        }, {responsive: true, displayModeBar: false});
     }
 }
